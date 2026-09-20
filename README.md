@@ -11,7 +11,7 @@
 </h1>
 
 > **Gcode** 是基于 [xAI Grok Build](https://github.com/xai-org/grok-build) 的社区增强版（fork），二进制名改为 `gcode`。
-> 保留上游 Agent harness，并增加 Gcode 品牌、自动发布、非强制登录启动和可选的 ChatGPT / Codex OAuth。
+> 保留上游 Agent harness，并增加 Gcode 品牌、自动发布和非强制登录启动。
 
 </div>
 
@@ -23,43 +23,16 @@
 |------|:---:|:---:|
 | 二进制名 | `grok` / `gork` | `gcode` |
 | 启动登录 | 首次启动进入登录流程 | **先进入主界面，登录由用户触发** |
-| ChatGPT 订阅 | 无 | **可选的 Gcode 自有 Codex OAuth** |
 | 自动构建 | 无 | **每次 push 自动 CI 构建 + 发布** |
 | 上游合并 | — | 最小改动策略，便于追踪上游 |
 
 ### 核心增强
 
 - **不强制登录**：启动直接进入主界面；`/login`、`gcode login` 和 `--force-login` 仍可显式发起登录。
-- **ChatGPT / Codex OAuth**：Gcode 自己完成浏览器登录，并只读写 `~/.gcode/auth.json`。
 - **自动 CI/CD**：push 到 `main` 自动构建 macOS ARM64 + Linux x86_64，发布到 GitHub Releases。
 - **上游友好**：保留清晰的 fork 边界，便于持续合并上游更新。
 
 Gcode 不再提供 PI 模型目录导入，也不再附带通用 multi-provider bridge。上游原生的自定义模型配置能力仍然保留。
-
-### 使用 ChatGPT 订阅（OpenAI Codex OAuth）
-
-该功能不需要 OpenAI Platform API Key，也不依赖 PI、Codex CLI 或 OpenCode 的本地凭证：
-
-1. 从 release 压缩包安装凭证 helper，并在新配置中使用可选模板：
-
-```sh
-mkdir -p ~/.gcode/bin
-install -m 755 gcode-openai-codex-auth ~/.gcode/bin/gcode-openai-codex-auth
-
-# 仅限尚无 ~/.gcode/config.toml 的新安装；已有配置请手动合并模板中的表。
-test -e ~/.gcode/config.toml || cp openai-codex.toml ~/.gcode/config.toml
-```
-
-2. 启动 `gcode`，输入 `/login` 并选择 `ChatGPT (gcode)`；随后选择 `openai-codex-*` 模型。
-
-运行时行为：
-
-| 项目 | 行为 |
-|------|------|
-| 端点 | `https://chatgpt.com/backend-api/codex/responses` |
-| 鉴权 | `Authorization: Bearer <oauth access>` |
-| 账号头 | JWT 里的 `chatgpt_account_id` → `chatgpt-account-id` |
-| 其它头 | `OpenAI-Beta: responses=experimental`，`originator: gcode` |
 
 ---
 
